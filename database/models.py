@@ -210,7 +210,6 @@ class XhsNote(Base):
     tag_list = Column(Text, comment='标签列表')
     note_url = Column(Text, comment='笔记URL')
     source_keyword = Column(Text, default='', comment='来源关键词')
-    xsec_token = Column(Text, comment='Xsec Token')
 
 class XhsNoteComment(Base):
     __tablename__ = 'xhs_note_comment'

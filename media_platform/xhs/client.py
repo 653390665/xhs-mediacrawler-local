@@ -629,13 +629,13 @@ class XiaoHongShuClient(AbstractApiClient, ProxyRefreshMixin):
             notes_cursor = notes_res.get("cursor", "")
             if "notes" not in notes_res:
                 utils.logger.info(
-                    f"[XiaoHongShuClient.get_all_notes_by_creator] No 'notes' key found in response: {notes_res}"
+                    "[XiaoHongShuClient.get_all_notes_by_creator] No 'notes' key found in response"
                 )
                 break
 
             notes = notes_res["notes"]
             utils.logger.info(
-                f"[XiaoHongShuClient.get_all_notes_by_creator] got user_id:{user_id} notes len : {len(notes)}"
+                f"[XiaoHongShuClient.get_all_notes_by_creator] Got {len(notes)} notes"
             )
 
             remaining = config.CRAWLER_MAX_NOTES_COUNT - len(result)
@@ -650,7 +650,7 @@ class XiaoHongShuClient(AbstractApiClient, ProxyRefreshMixin):
             await asyncio.sleep(crawl_interval)
 
         utils.logger.info(
-            f"[XiaoHongShuClient.get_all_notes_by_creator] Finished getting notes for user {user_id}, total: {len(result)}"
+            f"[XiaoHongShuClient.get_all_notes_by_creator] Finished with {len(result)} notes"
         )
         return result
 

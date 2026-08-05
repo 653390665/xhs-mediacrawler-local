@@ -93,7 +93,11 @@ class XiaoHongShuCrawler(AbstractCrawler):
                 await self.browser_context.add_init_script(path="libs/stealth.min.js")
 
             self.context_page = await self.browser_context.new_page()
-            await self.context_page.goto(self.index_url)
+            # 小红书是重 SPA，load 事件可能长时间不来，用 domcontentloaded 更稳
+            await self.context_page.goto(
+                self.index_url, wait_until="domcontentloaded", timeout=60000
+            )
+            await asyncio.sleep(3)
 
             # Create a client to interact with the Xiaohongshu website.
             self.xhs_client = await self.create_xhs_client(httpx_proxy_format)
@@ -154,7 +158,10 @@ class XiaoHongShuCrawler(AbstractCrawler):
                         page=page,
                         sort=(SearchSortType(config.SORT_TYPE) if config.SORT_TYPE != "" else SearchSortType.GENERAL),
                     )
-                    utils.logger.info(f"[XiaoHongShuCrawler.search] Search notes response: {notes_res}")
+                    result_count = len(notes_res.get("items", [])) if notes_res else 0
+                    utils.logger.info(
+                        f"[XiaoHongShuCrawler.search] Search returned {result_count} items"
+                    )
                     if not notes_res or not notes_res.get("has_more", False):
                         utils.logger.info("[XiaoHongShuCrawler.search] No more content!")
                         break
@@ -175,7 +182,10 @@ class XiaoHongShuCrawler(AbstractCrawler):
                             note_ids.append(note_detail.get("note_id"))
                             xsec_tokens.append(note_detail.get("xsec_token"))
                     page += 1
-                    utils.logger.info(f"[XiaoHongShuCrawler.search] Note details: {note_details}")
+                    stored_count = sum(detail is not None for detail in note_details)
+                    utils.logger.info(
+                        f"[XiaoHongShuCrawler.search] Stored {stored_count} note details"
+                    )
                     await self.batch_get_note_comments(note_ids, xsec_tokens)
 
                     # Sleep after each page navigation
@@ -192,7 +202,7 @@ class XiaoHongShuCrawler(AbstractCrawler):
             try:
                 # Parse creator URL to get user_id and security tokens
                 creator_info: CreatorUrlInfo = parse_creator_info_from_url(creator_url)
-                utils.logger.info(f"[XiaoHongShuCrawler.get_creators_and_notes] Parse creator URL info: {creator_info}")
+                utils.logger.info("[XiaoHongShuCrawler.get_creators_and_notes] Parsed creator URL")
                 user_id = creator_info.user_id
 
                 # get creator detail info from web html content

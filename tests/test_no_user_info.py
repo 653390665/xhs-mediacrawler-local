@@ -8,13 +8,22 @@
    不含原始 user_id、昵称已脱敏且不等于原文。
 3. 仓库 grep 断言 —— store/ 与 media_platform/ 不再把禁用字段作为存储 dict 的 key。
 """
+import ast
+import json
+import pathlib
 import re
 import subprocess
-import pathlib
 
 import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+CONFIG_ENV_NAMES = (
+    "XHS_COOKIES",
+    "XHS_LOGIN_TYPE",
+    "XHS_KEYWORDS",
+    "XHS_CRAWLER_MAX_NOTES_COUNT",
+    "XHS_ENABLE_GET_COMMENTS",
+)
 
 # 统一的禁用字段名(键)。昵称字段(nickname/user_nickname/screen_name/name/user_name)允许保留(值需脱敏)。
 FORBIDDEN_KEYS = {
@@ -22,7 +31,7 @@ FORBIDDEN_KEYS = {
     "avatar", "user_avatar", "face", "sign", "profile_url", "user_link",
     "url_token", "user_url_token", "ip_location", "ip_address", "gender", "sex",
     "up_id", "fan_id", "up_name", "fan_name", "up_avatar", "fan_avatar",
-    "up_sign", "fan_sign", "mid",
+    "up_sign", "fan_sign", "mid", "author_id", "xsec_token", "cookie", "cookies",
 }
 NICK_KEYS = {"nickname", "user_nickname", "screen_name", "name", "user_name"}
 MASK_RE = re.compile(r"^.?\*{1,4}.?$")
@@ -126,6 +135,8 @@ def test_xhs_note_extraction_masks_user_info():
         xs.XhsStoreFactory.create_store = orig
     _check_no_forbidden_keys(captured, "xhs_note")
     assert captured.get("creator_hash") != "u123"
+    assert captured["note_url"] == "https://www.xiaohongshu.com/explore/abc"
+    assert "tok" not in json.dumps(captured)
     _check_nickname_masked(captured, "小红同学", "xhs_note")
 
 
@@ -233,6 +244,106 @@ def test_store_no_creator_orm_imports():
         capture_output=True, text=True,
     )
     assert out.stdout.strip() == "", f"store/ 仍 import 已删除的 creator ORM 表:\n{out.stdout}"
+
+
+def _load_base_config(tmp_path, monkeypatch, **environment):
+    source = (ROOT / "config" / "base_config.py").read_text(encoding="utf-8")
+    source = source.split("\nfrom .bilibili_config import *", 1)[0]
+    fake_config = tmp_path / "config" / "base_config.py"
+    fake_config.parent.mkdir(exist_ok=True)
+
+    for name in CONFIG_ENV_NAMES:
+        monkeypatch.delenv(name, raising=False)
+    for name, value in environment.items():
+        monkeypatch.setenv(name, value)
+    namespace = {"__file__": str(fake_config)}
+    exec(compile(source, str(fake_config), "exec"), namespace)
+    return namespace
+
+
+def test_crawler_config_uses_generic_defaults(tmp_path, monkeypatch):
+    namespace = _load_base_config(tmp_path, monkeypatch)
+
+    assert namespace["KEYWORDS"] == "编程副业,编程兼职"
+    assert namespace["CRAWLER_MAX_NOTES_COUNT"] == 15
+    assert namespace["ENABLE_GET_COMMENTS"] is True
+
+
+def test_crawler_config_accepts_environment_overrides(tmp_path, monkeypatch):
+    namespace = _load_base_config(
+        tmp_path,
+        monkeypatch,
+        XHS_KEYWORDS="测试话题,通用对标",
+        XHS_CRAWLER_MAX_NOTES_COUNT="42",
+        XHS_ENABLE_GET_COMMENTS="false",
+    )
+
+    assert namespace["KEYWORDS"] == "测试话题,通用对标"
+    assert namespace["CRAWLER_MAX_NOTES_COUNT"] == 42
+    assert namespace["ENABLE_GET_COMMENTS"] is False
+
+
+@pytest.mark.parametrize(
+    ("name", "value", "message"),
+    [
+        ("XHS_CRAWLER_MAX_NOTES_COUNT", "0", "positive integer"),
+        ("XHS_CRAWLER_MAX_NOTES_COUNT", "3.5", "positive integer"),
+        ("XHS_ENABLE_GET_COMMENTS", "yes", "must be one of"),
+    ],
+)
+def test_crawler_config_rejects_invalid_environment_values(
+    tmp_path, monkeypatch, name, value, message
+):
+    with pytest.raises(ValueError, match=message):
+        _load_base_config(tmp_path, monkeypatch, **{name: value})
+
+
+def test_cookie_config_is_optional_and_environment_takes_priority(tmp_path, monkeypatch):
+    namespace = _load_base_config(tmp_path, monkeypatch)
+    assert namespace["COOKIES"] == ""
+    assert namespace["LOGIN_TYPE"] == "qrcode"
+
+    namespace = _load_base_config(
+        tmp_path, monkeypatch, XHS_COOKIES="test-only-cookie"
+    )
+    assert namespace["COOKIES"] == "test-only-cookie"
+    assert namespace["LOGIN_TYPE"] == "cookie"
+
+
+def test_cookie_file_is_ignored_by_submodule():
+    patterns = (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
+    assert "cookies.txt" in patterns
+
+
+def test_xhs_logs_do_not_include_sensitive_payloads():
+    files = [
+        ROOT / "store" / "xhs" / "__init__.py",
+        ROOT / "media_platform" / "xhs" / "core.py",
+        ROOT / "media_platform" / "xhs" / "client.py",
+    ]
+    forbidden = ("author_id", "user_id", "xsec_token", "notes_res", "note_details", "creator_info")
+    bad = []
+    for path in files:
+        source = path.read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        for call in (node for node in ast.walk(tree) if isinstance(node, ast.Call)):
+            snippet = ast.get_source_segment(source, call) or ""
+            if ".logger." in snippet and any(name in snippet for name in forbidden):
+                bad.append(f"{path.relative_to(ROOT)}:{call.lineno}")
+    assert not bad, f"XHS 日志仍包含敏感载荷: {bad}"
+
+
+def test_backfill_has_one_syntax_valid_sanitized_path():
+    assert not (ROOT / "backfill_followers.py").exists()
+    script = ROOT / "backfill_followers.mjs"
+    source = script.read_text(encoding="utf-8")
+    assert "creator_hash" in source
+    assert "nickname" not in source
+    assert "path.resolve(opts.input) === path.resolve(opts.output)" in source
+    result = subprocess.run(
+        ["node", "--check", str(script)], capture_output=True, text=True
+    )
+    assert result.returncode == 0, result.stderr
 
 
 if __name__ == "__main__":

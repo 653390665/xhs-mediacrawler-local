@@ -17,6 +17,32 @@
 # 详细许可条款请参阅项目根目录下的LICENSE文件。
 # 使用本代码即表示您同意遵守上述原则和LICENSE中的所有条款。
 
+import os
+from pathlib import Path
+
+
+def _env_positive_int(name: str, default: int) -> int:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    if not raw.isascii() or not raw.isdigit() or int(raw) <= 0:
+        raise ValueError(f"{name} must be a positive integer, got {raw!r}")
+    return int(raw)
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    values = {"1": True, "true": True, "0": False, "false": False}
+    normalized = raw.lower()
+    if normalized not in values:
+        raise ValueError(
+            f"{name} must be one of: 1, true, 0, false; got {raw!r}"
+        )
+    return values[normalized]
+
+
 # Basic configuration
 PLATFORM = "xhs"  # Platform, xhs | dy | ks | bili | wb | tieba | zhihu
 
@@ -24,9 +50,14 @@ PLATFORM = "xhs"  # Platform, xhs | dy | ks | bili | wb | tieba | zhihu
 # 开启后 API 走 webapi.rednote.com，cookie 域使用 .rednote.com
 XHS_INTERNATIONAL = False
 
-KEYWORDS = "编程副业,编程兼职"  # Keyword search configuration, separated by English commas
-LOGIN_TYPE = "qrcode"  # qrcode or phone or cookie
-COOKIES = ""
+KEYWORDS = os.environ.get(
+    "XHS_KEYWORDS", "编程副业,编程兼职"
+)  # Keyword search configuration, separated by English commas
+_LOCAL_COOKIE_FILE = Path(__file__).resolve().parents[1] / "cookies.txt"
+COOKIES = os.environ.get("XHS_COOKIES", "")
+if not COOKIES and _LOCAL_COOKIE_FILE.is_file():
+    COOKIES = _LOCAL_COOKIE_FILE.read_text(encoding="utf-8").strip()
+LOGIN_TYPE = os.environ.get("XHS_LOGIN_TYPE", "cookie" if COOKIES else "qrcode")
 CRAWLER_TYPE = (
     "search"  # Crawling type, search (keyword search) | detail (post details) | creator (creator homepage data)
 )
@@ -99,7 +130,7 @@ USER_DATA_DIR = "%s_user_data_dir"  # %s will be replaced by platform name
 START_PAGE = 1
 
 # Control the number of crawled videos/posts
-CRAWLER_MAX_NOTES_COUNT = 15
+CRAWLER_MAX_NOTES_COUNT = _env_positive_int("XHS_CRAWLER_MAX_NOTES_COUNT", 15)
 
 # Controlling the number of concurrent crawlers
 MAX_CONCURRENCY_NUM = 1
@@ -108,7 +139,7 @@ MAX_CONCURRENCY_NUM = 1
 ENABLE_GET_MEIDAS = False
 
 # Whether to enable comment crawling mode. Comment crawling is enabled by default.
-ENABLE_GET_COMMENTS = True
+ENABLE_GET_COMMENTS = _env_bool("XHS_ENABLE_GET_COMMENTS", True)
 
 # Control the number of crawled first-level comments (single video/post)
 CRAWLER_MAX_COMMENTS_COUNT_SINGLENOTES = 10

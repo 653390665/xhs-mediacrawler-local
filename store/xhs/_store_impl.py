@@ -155,8 +155,7 @@ class XhsDbStoreImplement(AbstractStore):
             image_list=json.dumps(content_item.get("image_list")),
             tag_list=json.dumps(content_item.get("tag_list")),
             note_url=content_item.get("note_url"),
-            source_keyword=content_item.get("source_keyword", ""),
-            xsec_token=content_item.get("xsec_token", "")
+            source_keyword=content_item.get("source_keyword", "")
         )
         session.add(note)
 
