@@ -1,27 +1,28 @@
+/* eslint-disable react-refresh/only-export-components */
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyber-neon-cyan disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyber-neon-cyan focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
         default:
-          'bg-cyber-neon-cyan/20 text-cyber-neon-cyan border border-cyber-neon-cyan/50 hover:bg-cyber-neon-cyan/30 hover:shadow-glow-cyan-sm active:scale-95',
+          'bg-primary text-primary-foreground border border-primary hover:bg-primary/90',
         destructive:
-          'bg-cyber-neon-pink/20 text-cyber-neon-pink border border-cyber-neon-pink/50 hover:bg-cyber-neon-pink/30 hover:shadow-glow-pink-sm active:scale-95',
+          'bg-destructive text-destructive-foreground border border-destructive hover:bg-destructive/90',
         outline:
           'border border-cyber-border-DEFAULT bg-transparent hover:bg-cyber-bg-tertiary hover:border-cyber-neon-cyan/50 hover:text-cyber-neon-cyan',
         secondary:
-          'bg-cyber-neon-green/20 text-cyber-neon-green border border-cyber-neon-green/50 hover:bg-cyber-neon-green/30 hover:shadow-glow-green-sm active:scale-95',
+          'bg-cyber-neon-green/15 text-cyber-neon-green border border-cyber-neon-green/40 hover:bg-cyber-neon-green/20',
         ghost:
           'hover:bg-cyber-bg-tertiary hover:text-cyber-neon-cyan',
         link:
           'text-cyber-neon-cyan underline-offset-4 hover:underline',
         glow:
-          'bg-cyber-neon-cyan/20 text-cyber-neon-cyan border border-cyber-neon-cyan/50 shadow-glow-cyan-sm hover:shadow-glow-cyan hover:bg-cyber-neon-cyan/30 active:scale-95',
+          'bg-primary text-primary-foreground border border-primary hover:bg-primary/90',
       },
       size: {
         default: 'h-10 px-4 py-2',

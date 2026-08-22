@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
+/* eslint-disable react-refresh/only-export-components */
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle, XCircle, Loader2, RefreshCw, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 import { envApi, EnvCheckResult } from '@/lib/api'
 
 const ENV_CHECK_KEY = 'mediacrawler_env_checked'
@@ -25,23 +27,28 @@ export function EnvironmentCheck({ onCheckComplete }: EnvironmentCheckProps) {
   const [status, setStatus] = useState<'checking' | 'success' | 'error'>('checking')
   const [result, setResult] = useState<EnvCheckResult | null>(null)
   const [showDetails, setShowDetails] = useState(false)
+  const timerRef = useRef<number | null>(null)
+  const mountedRef = useRef(true)
 
-  const checkEnvironment = async () => {
+  const checkEnvironment = useCallback(async () => {
     setStatus('checking')
     setResult(null)
     try {
       const response = await envApi.check()
+      if (!mountedRef.current) return
       setResult(response.data)
       if (response.data.success) {
         setStatus('success')
         // 存储到 localStorage
         localStorage.setItem(ENV_CHECK_KEY, 'true')
         // 成功后延迟关闭
-        setTimeout(() => onCheckComplete(true), 1500)
+        if (timerRef.current) window.clearTimeout(timerRef.current)
+        timerRef.current = window.setTimeout(() => { if (mountedRef.current) onCheckComplete(true) }, 1500)
       } else {
         setStatus('error')
       }
-    } catch (error) {
+    } catch (_error) {
+      if (!mountedRef.current) return
       setResult({
         success: false,
         message: t('defaultError'),
@@ -49,11 +56,16 @@ export function EnvironmentCheck({ onCheckComplete }: EnvironmentCheckProps) {
       })
       setStatus('error')
     }
-  }
+  }, [onCheckComplete, t])
 
   useEffect(() => {
-    checkEnvironment()
-  }, [])
+    mountedRef.current = true
+    queueMicrotask(() => { if (mountedRef.current) void checkEnvironment() })
+    return () => {
+      mountedRef.current = false
+      if (timerRef.current) window.clearTimeout(timerRef.current)
+    }
+  }, [checkEnvironment])
 
   const handleSkip = () => {
     localStorage.setItem(ENV_CHECK_KEY, 'true')
@@ -65,24 +77,19 @@ export function EnvironmentCheck({ onCheckComplete }: EnvironmentCheckProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-cyber-bg-panel border border-cyber-border-DEFAULT rounded-lg shadow-cyber-card p-6 max-w-md w-full mx-4 relative">
-        {/* Corner decorations */}
-        <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-cyber-neon-cyan" />
-        <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-cyber-neon-cyan" />
-        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-cyber-neon-cyan" />
-        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-cyber-neon-cyan" />
+    <Dialog open modal onOpenChange={() => undefined}>
+      <DialogContent showClose={false}>
 
         {/* Header */}
         <div className="flex items-center gap-3 mb-4">
           <AlertTriangle className="w-6 h-6 text-cyber-neon-orange" />
-          <h2 className="text-lg font-mono font-semibold text-cyber-neon-cyan glow-text-cyan">
+          <DialogTitle className="text-lg font-mono font-semibold text-cyber-neon-cyan glow-text-cyan">
             {t('title')}
-          </h2>
+          </DialogTitle>
         </div>
 
         {/* Status Display */}
-        <div className="bg-cyber-bg-tertiary border border-cyber-border-DEFAULT rounded-lg p-4 mb-4">
+        <DialogDescription asChild><div className="bg-cyber-bg-tertiary border border-cyber-border-DEFAULT rounded-lg p-4 mb-4">
           <div className="flex items-center gap-3">
             {status === 'checking' && (
               <>
@@ -120,13 +127,13 @@ export function EnvironmentCheck({ onCheckComplete }: EnvironmentCheckProps) {
                 {showDetails ? t('hideDetails') : t('showDetails')}
               </button>
               {showDetails && (
-                <pre className="mt-2 p-3 bg-black text-cyber-neon-green rounded text-xs font-mono overflow-x-auto whitespace-pre-wrap border border-cyber-border-DEFAULT">
+                <pre className="mt-2 p-3 bg-cyber-bg-secondary text-cyber-neon-green rounded-md text-xs font-mono overflow-x-auto whitespace-pre-wrap border border-cyber-border-DEFAULT">
                   {result.error}
                 </pre>
               )}
             </div>
           )}
-        </div>
+        </div></DialogDescription>
 
         {/* Help Text */}
         {status === 'error' && (
@@ -171,7 +178,7 @@ export function EnvironmentCheck({ onCheckComplete }: EnvironmentCheckProps) {
             </Button>
           )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

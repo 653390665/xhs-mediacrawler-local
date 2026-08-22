@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import tailwindcssAnimate from 'tailwindcss-animate'
 
 const config: Config = {
   darkMode: ['class'],
@@ -9,7 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Cyberpunk color scheme using CSS variables
+        // Legacy names are retained for component compatibility; values are semantic and muted.
         cyber: {
           // Background colors
           bg: {
@@ -21,7 +22,7 @@ const config: Config = {
             glass: 'rgb(var(--glass-bg))',
             glassDark: 'rgb(var(--glass-dark-bg))',
           },
-          // Neon colors
+          // Status and action colors
           neon: {
             cyan: 'rgb(var(--cyber-neon-cyan) / <alpha-value>)',
             cyanDim: 'rgb(var(--cyber-neon-cyan-dim) / <alpha-value>)',
@@ -86,28 +87,26 @@ const config: Config = {
         mono: ['JetBrains Mono', 'Fira Code', 'Consolas', 'monospace'],
       },
       boxShadow: {
-        // Neon glow shadows - these use CSS variables for theme support
-        'glow-cyan': '0 0 var(--shadow-glow-spread, 10px) rgb(var(--cyber-neon-cyan) / var(--shadow-glow-opacity, 0.5)), 0 0 calc(var(--shadow-glow-spread, 10px) * 2) rgb(var(--cyber-neon-cyan) / calc(var(--shadow-glow-opacity, 0.5) * 0.6)), 0 0 calc(var(--shadow-glow-spread, 10px) * 3) rgb(var(--cyber-neon-cyan) / calc(var(--shadow-glow-opacity, 0.5) * 0.2))',
-        'glow-cyan-sm': '0 0 5px rgb(var(--cyber-neon-cyan) / 0.4), 0 0 10px rgb(var(--cyber-neon-cyan) / 0.2)',
-        'glow-pink': '0 0 var(--shadow-glow-spread, 10px) rgb(var(--cyber-neon-pink) / var(--shadow-glow-opacity, 0.5)), 0 0 calc(var(--shadow-glow-spread, 10px) * 2) rgb(var(--cyber-neon-pink) / calc(var(--shadow-glow-opacity, 0.5) * 0.6))',
-        'glow-pink-sm': '0 0 5px rgb(var(--cyber-neon-pink) / 0.4), 0 0 10px rgb(var(--cyber-neon-pink) / 0.2)',
-        'glow-green': '0 0 var(--shadow-glow-spread, 10px) rgb(var(--cyber-neon-green) / var(--shadow-glow-opacity, 0.5)), 0 0 calc(var(--shadow-glow-spread, 10px) * 2) rgb(var(--cyber-neon-green) / calc(var(--shadow-glow-opacity, 0.5) * 0.6))',
-        'glow-green-sm': '0 0 5px rgb(var(--cyber-neon-green) / 0.4), 0 0 10px rgb(var(--cyber-neon-green) / 0.2)',
-        'glow-orange': '0 0 var(--shadow-glow-spread, 10px) rgb(var(--cyber-neon-orange) / var(--shadow-glow-opacity, 0.5)), 0 0 calc(var(--shadow-glow-spread, 10px) * 2) rgb(var(--cyber-neon-orange) / calc(var(--shadow-glow-opacity, 0.5) * 0.6))',
-        'cyber-card': '0 0 1px rgb(var(--cyber-neon-cyan) / 0.5), 0 4px 20px rgba(0, 0, 0, 0.3)',
-        'cyber-inset': 'inset 0 0 20px rgba(0, 0, 0, 0.5)',
-        // Soft shadows for glassmorphism
-        'cyber-soft': '0 4px 24px rgba(0, 0, 0, 0.2), 0 0 1px rgb(var(--cyber-neon-cyan) / 0.1)',
-        'cyber-float': '0 8px 32px rgba(0, 0, 0, 0.25), 0 0 1px rgb(var(--cyber-neon-cyan) / 0.15)',
-        'cyber-elevated': '0 12px 40px rgba(0, 0, 0, 0.3)',
+        'glow-cyan': '0 1px 3px rgb(20 40 50 / 0.08)',
+        'glow-cyan-sm': '0 1px 2px rgb(20 40 50 / 0.08)',
+        'glow-pink': '0 1px 3px rgb(20 40 50 / 0.08)',
+        'glow-pink-sm': '0 1px 2px rgb(20 40 50 / 0.08)',
+        'glow-green': '0 1px 3px rgb(20 40 50 / 0.08)',
+        'glow-green-sm': '0 1px 2px rgb(20 40 50 / 0.08)',
+        'glow-orange': '0 1px 3px rgb(20 40 50 / 0.08)',
+        'cyber-card': '0 1px 3px rgb(20 40 50 / 0.08)',
+        'cyber-inset': 'inset 0 1px 2px rgb(20 40 50 / 0.06)',
+        'cyber-soft': '0 1px 3px rgb(20 40 50 / 0.08)',
+        'cyber-float': '0 2px 6px rgb(20 40 50 / 0.1)',
+        'cyber-elevated': '0 4px 12px rgb(20 40 50 / 0.12)',
       },
       animation: {
         'slide-up': 'slideUp 0.3s ease-out forwards',
         'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
-        'scanline': 'scanline 8s linear infinite',
+        'pulse-glow': 'pulse 2s ease-in-out infinite',
+        'scanline': 'none',
         'cursor-blink': 'cursorBlink 1s step-end infinite',
-        'border-glow': 'borderGlow 3s linear infinite',
+        'border-glow': 'none',
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
       },
@@ -116,25 +115,9 @@ const config: Config = {
           from: { opacity: '0', transform: 'translateY(10px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
-        pulseGlow: {
-          '0%, 100%': {
-            boxShadow: '0 0 5px rgb(var(--cyber-neon-cyan) / 0.5), 0 0 10px rgb(var(--cyber-neon-cyan) / 0.3)'
-          },
-          '50%': {
-            boxShadow: '0 0 15px rgb(var(--cyber-neon-cyan) / 0.8), 0 0 25px rgb(var(--cyber-neon-cyan) / 0.5), 0 0 35px rgb(var(--cyber-neon-cyan) / 0.3)'
-          },
-        },
-        scanline: {
-          '0%': { transform: 'translateY(-100%)' },
-          '100%': { transform: 'translateY(100vh)' },
-        },
         cursorBlink: {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0' },
-        },
-        borderGlow: {
-          '0%, 100%': { borderColor: 'rgb(var(--cyber-neon-cyan) / 0.3)' },
-          '50%': { borderColor: 'rgb(var(--cyber-neon-cyan) / 0.6)' },
         },
         'accordion-down': {
           from: { height: '0' },
@@ -152,7 +135,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [tailwindcssAnimate],
 }
 
 export default config

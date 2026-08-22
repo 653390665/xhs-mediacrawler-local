@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
@@ -16,13 +17,13 @@ const badgeVariants = cva(
         outline:
           'border-cyber-border-DEFAULT text-cyber-text-primary',
         success:
-          'border-cyber-neon-green/30 bg-cyber-neon-green/10 text-cyber-neon-green shadow-glow-green-sm',
+          'border-cyber-neon-green/30 bg-cyber-neon-green/10 text-cyber-neon-green',
         warning:
           'border-cyber-neon-orange/30 bg-cyber-neon-orange/10 text-cyber-neon-orange',
         idle:
           'border-cyber-border-DEFAULT bg-cyber-bg-tertiary text-cyber-text-muted',
         running:
-          'border-cyber-neon-green/50 bg-cyber-neon-green/20 text-cyber-neon-green shadow-glow-green-sm animate-pulse-fast',
+          'border-cyber-neon-green/50 bg-cyber-neon-green/15 text-cyber-neon-green',
       },
     },
     defaultVariants: {

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { FolderOpen, RefreshCw } from 'lucide-react'
+import { AlertTriangle, FolderOpen, RefreshCw } from 'lucide-react'
 import { dataApi } from '@/lib/api'
 import { FileCard } from './FileCard'
 import { Button } from '@/components/ui/button'
@@ -39,7 +39,7 @@ export function DataExplorer() {
   const { t } = useTranslation('data')
   const [activeTab, setActiveTab] = useState<string>('all')
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const { data, isLoading, isError, refetch, isRefetching } = useQuery({
     queryKey: ['dataFiles'],
     queryFn: async () => {
       const { data } = await dataApi.getFiles()
@@ -47,7 +47,7 @@ export function DataExplorer() {
     },
   })
 
-  const files = data || []
+  const files = useMemo(() => data || [], [data])
 
   // 按类别分组文件
   const { categories, groupedFiles } = useMemo(() => {
@@ -96,6 +96,16 @@ export function DataExplorer() {
         </Button>
       </div>
 
+      {isError && files.length > 0 && (
+        <div role="alert" className="mb-4 flex items-start gap-2 rounded-md border border-cyber-neon-orange/40 bg-cyber-neon-orange/10 p-3 text-sm font-mono text-cyber-neon-orange">
+          <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+          <div>
+            <div className="font-semibold">{t('explorer.staleTitle')}</div>
+            <div className="text-cyber-text-secondary">{t('explorer.staleHint')}</div>
+          </div>
+        </div>
+      )}
+
       {/* Category Tabs */}
       {files.length > 0 && categories.length > 1 && (
         <div className="flex items-center gap-2 mb-4 flex-wrap">
@@ -103,7 +113,7 @@ export function DataExplorer() {
             onClick={() => setActiveTab('all')}
             className={`px-3 py-1.5 rounded-md text-xs font-mono transition-all ${
               activeTab === 'all'
-                ? 'bg-cyber-neon-cyan text-black font-bold'
+                ? 'bg-cyber-neon-cyan text-cyber-bg-primary font-bold'
                 : 'bg-cyber-bg-tertiary text-cyber-text-secondary hover:text-cyber-text-primary border border-cyber-border-subtle hover:border-cyber-neon-cyan/50'
             }`}
           >
@@ -115,7 +125,7 @@ export function DataExplorer() {
               onClick={() => setActiveTab(category)}
               className={`px-3 py-1.5 rounded-md text-xs font-mono transition-all ${
                 activeTab === category
-                  ? 'bg-cyber-neon-cyan text-black font-bold'
+                ? 'bg-cyber-neon-cyan text-cyber-bg-primary font-bold'
                   : 'bg-cyber-bg-tertiary text-cyber-text-secondary hover:text-cyber-text-primary border border-cyber-border-subtle hover:border-cyber-neon-cyan/50'
               }`}
             >
@@ -132,12 +142,23 @@ export function DataExplorer() {
             {t('explorer.loading')}
           </div>
         </div>
+      ) : isError && files.length === 0 ? (
+        <div role="alert" className="flex flex-1 flex-col items-center justify-center text-center">
+          <AlertTriangle className="mb-4 h-16 w-16 text-cyber-neon-orange/60" />
+          <h3 className="mb-2 text-lg font-mono font-medium text-cyber-neon-orange">
+            {t('explorer.errorTitle')}
+          </h3>
+          <p className="mb-4 max-w-md text-sm font-mono text-cyber-text-muted">
+            {t('explorer.errorHint')}
+          </p>
+          <Button variant="outline" onClick={() => refetch()} disabled={isRefetching} className="font-mono">
+            <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
+            {t('explorer.retry')}
+          </Button>
+        </div>
       ) : files.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center">
-          <div className="relative">
-            <FolderOpen className="w-16 h-16 text-cyber-neon-cyan/30 mb-4" />
-            <div className="absolute inset-0 blur-xl bg-cyber-neon-cyan/10" />
-          </div>
+          <FolderOpen className="w-16 h-16 text-cyber-neon-cyan/30 mb-4" />
           <h3 className="text-lg font-mono font-medium text-cyber-neon-cyan mb-2">
             {t('explorer.noData')}
           </h3>
