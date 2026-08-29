@@ -21,7 +21,7 @@ type SectionProps = {
 
 function Section({ title, description, icon: Icon, children, className = '' }: SectionProps) {
   return (
-    <section className={`rounded-lg glass-panel float-panel overflow-hidden ${className}`}>
+    <section className={`rounded-md bg-cyber-bg-panel border border-cyber-border-DEFAULT float-panel overflow-hidden ${className}`}>
       <header className="px-4 py-3 border-b border-cyber-border-subtle/50 flex items-center gap-3 bg-cyber-bg-tertiary/30">
         <div className="h-8 w-8 rounded-md bg-cyber-bg-tertiary border border-cyber-border-subtle flex items-center justify-center flex-shrink-0">
           <Icon className="h-4 w-4 text-cyber-neon-cyan" />
@@ -394,7 +394,7 @@ export function CrawlerConfigPanel() {
           <Button
             onClick={handleStop}
             disabled={isBusy}
-            className="w-full h-12 bg-cyber-neon-pink text-white font-mono font-bold text-sm tracking-wider hover:bg-cyber-neon-pink/90 hover:shadow-glow-pink-sm transition-all"
+            className="w-full h-12 bg-cyber-neon-pink text-cyber-bg-elevated font-mono font-bold text-sm tracking-wider hover:bg-cyber-neon-pink/90 transition-colors"
           >
             <Square className="w-4 h-4" />
             {isStopping ? t('button.stopping') : t('button.terminate')}
@@ -403,7 +403,7 @@ export function CrawlerConfigPanel() {
           <Button
             onClick={handleStart}
             disabled={isBusy}
-            className="w-full h-12 bg-cyber-neon-cyan text-cyber-bg-primary font-mono font-bold text-sm tracking-wider hover:bg-cyber-neon-cyan/90 hover:shadow-glow-cyan-sm transition-all"
+            className="w-full h-12 bg-cyber-neon-cyan text-cyber-bg-primary font-mono font-bold text-sm tracking-wider hover:bg-cyber-neon-cyan/90 transition-colors"
           >
             <Play className="w-4 h-4" />
             {isStarting ? t('button.initiating') : t('button.initiateScan')}

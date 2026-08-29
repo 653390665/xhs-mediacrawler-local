@@ -16,12 +16,24 @@ export function Sidebar({ onShowDisclaimer }: SidebarProps) {
   const status = useCrawlerStore((state) => state.status)
 
   // Poll status
-  useCrawlerStatus()
+  const statusQuery = useCrawlerStatus()
+
+  let apiStatusLabel = t('sidebar.apiStatus.unknown')
+  let apiStatusClass = 'status-dot-warning'
+  if (statusQuery.isPending) {
+    apiStatusLabel = t('sidebar.apiStatus.checking')
+  } else if (statusQuery.isError) {
+    apiStatusLabel = t('sidebar.apiStatus.unavailable')
+    apiStatusClass = 'status-dot-error'
+  } else if (statusQuery.isSuccess && statusQuery.data) {
+    apiStatusLabel = t('sidebar.apiStatus.online')
+    apiStatusClass = 'status-dot-online'
+  }
 
   const isRunning = status === 'running'
 
   return (
-    <header className="h-14 flex-shrink-0 glass-panel border-b border-cyber-border-subtle relative z-10">
+    <header className="h-14 flex-shrink-0 bg-cyber-bg-panel border-b border-cyber-border-subtle relative z-10">
       <div className="h-full px-4 flex items-center justify-between">
         {/* Left: Logo and GitHub Star */}
         <div className="flex items-center gap-3">
@@ -33,7 +45,7 @@ export function Sidebar({ onShowDisclaimer }: SidebarProps) {
             href="https://github.com/NanmiCoder/MediaCrawler"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-cyber-border-subtle hover:border-cyber-neon-cyan hover:shadow-glow-cyan-sm transition-all bg-cyber-bg-tertiary"
+            className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-cyber-border-subtle hover:border-cyber-neon-cyan transition-colors bg-cyber-bg-tertiary"
           >
             <Github className="w-4 h-4 text-cyber-text-secondary" />
             <span className="text-xs font-mono text-cyber-text-secondary">Star</span>
@@ -44,7 +56,7 @@ export function Sidebar({ onShowDisclaimer }: SidebarProps) {
             </Badge>
           )}
           {isRunning && (
-            <span className="w-2 h-2 bg-cyber-neon-green rounded-full shadow-glow-green-sm animate-pulse-fast" />
+            <span className="w-2 h-2 bg-cyber-neon-green rounded-full" />
           )}
         </div>
 
@@ -75,10 +87,10 @@ export function Sidebar({ onShowDisclaimer }: SidebarProps) {
           <div className="hidden lg:flex items-center gap-2 text-xs font-mono">
             <span className="text-cyber-text-muted">{t('sidebar.api')}:</span>
             <span className="text-cyber-neon-green">v1.0.0</span>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5" aria-live="polite">
               <Wifi className="w-3 h-3 text-cyber-text-secondary" />
-              <span className="text-cyber-text-secondary">{t('sidebar.local')}</span>
-              <span className="status-dot status-dot-online" />
+              <span className="text-cyber-text-secondary">{apiStatusLabel}</span>
+              <span className={`status-dot ${apiStatusClass}`} />
             </div>
           </div>
         </div>

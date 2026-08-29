@@ -28,8 +28,10 @@ function App() {
     setShowDisclaimer(true)
   }
 
+  const gated = !licenseAccepted || showDisclaimer || !envChecked
+
   return (
-    <div className="flex flex-col h-screen cyber-grid overflow-hidden relative">
+    <div className="flex flex-col h-screen bg-cyber-bg-primary overflow-hidden relative">
       {/* License Disclaimer Modal - Shows first or when triggered */}
       {(!licenseAccepted || showDisclaimer) && (
         <LicenseDisclaimer onAccept={handleLicenseAccept} />
@@ -40,7 +42,7 @@ function App() {
         <EnvironmentCheck onCheckComplete={handleEnvCheckComplete} />
       )}
 
-      {/* Header Bar */}
+      {!gated && <>
       <Sidebar onShowDisclaimer={handleShowDisclaimer} />
 
       {/* Main Area */}
@@ -61,12 +63,13 @@ function App() {
       <Toaster
         position="top-right"
         toastOptions={{
-          className: 'glass-panel font-mono text-cyber-text-primary',
+          className: 'bg-cyber-bg-panel border border-cyber-border-DEFAULT font-mono text-cyber-text-primary',
           style: {
             fontFamily: 'JetBrains Mono, monospace',
           },
         }}
       />
+      </>}
     </div>
   )
 }

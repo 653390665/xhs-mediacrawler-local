@@ -9,26 +9,26 @@ const levelConfig: Record<string, { text: string; bg: string; glow: string }> = 
   info: {
     text: 'text-cyber-neon-cyan',
     bg: 'bg-cyber-neon-cyan/10',
-    glow: 'shadow-[0_0_3px_rgba(0,255,255,0.3)]'
+    glow: ''
   },
   success: {
     text: 'text-cyber-neon-green',
     bg: 'bg-cyber-neon-green/10',
-    glow: 'shadow-[0_0_3px_rgba(0,255,65,0.3)]'
+    glow: ''
   },
   warning: {
     text: 'text-cyber-neon-orange',
     bg: 'bg-cyber-neon-orange/10',
-    glow: 'shadow-[0_0_3px_rgba(255,152,0,0.3)]'
+    glow: ''
   },
   error: {
     text: 'text-cyber-neon-pink',
     bg: 'bg-cyber-neon-pink/10',
-    glow: 'shadow-[0_0_3px_rgba(255,0,128,0.3)]'
+    glow: ''
   },
   debug: {
-    text: 'text-[#8b949e]',
-    bg: 'bg-[#21262d]',
+    text: 'text-cyber-text-secondary',
+    bg: 'bg-cyber-bg-tertiary',
     glow: ''
   },
 }
@@ -45,9 +45,9 @@ export function TerminalLine({ log }: TerminalLineProps) {
   const config = levelConfig[log.level] || levelConfig.info
 
   return (
-    <div className="flex gap-2 text-xs leading-relaxed font-mono group hover:bg-[#21262d]/50 px-1 -mx-1 rounded transition-colors">
+    <div className="flex gap-2 text-xs leading-relaxed font-mono group hover:bg-cyber-bg-tertiary/50 px-1 -mx-1 rounded transition-colors">
       {/* Timestamp */}
-      <span className="text-[#8b949e] flex-shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
+      <span className="text-cyber-text-secondary flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity">
         [{log.timestamp}]
       </span>
 

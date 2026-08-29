@@ -19,7 +19,7 @@ export function DataExplorerDialog() {
         <Button
           variant="outline"
           size="sm"
-          className="font-mono text-xs text-[#c9d1d9] border-[#30363d] bg-transparent hover:bg-[#21262d] hover:text-[#00ffff] hover:border-[#00ffff]/50"
+          className="font-mono text-xs text-cyber-text-secondary border-cyber-border-subtle bg-transparent hover:bg-cyber-bg-tertiary hover:text-cyber-neon-cyan hover:border-cyber-neon-cyan/50"
         >
           <Database className="w-3.5 h-3.5" />
           {t('dialog.button')}

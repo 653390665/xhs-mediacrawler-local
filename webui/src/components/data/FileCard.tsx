@@ -64,9 +64,7 @@ export function FileCard({ file }: FileCardProps) {
 
   return (
     <>
-      <Card className={`relative overflow-hidden card-scan group transition-all ${styles.border} hover:shadow-[0_0_15px_rgb(var(--cyber-neon-cyan)/0.15)]`}>
-        {/* Scan effect overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyber-neon-cyan/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
+      <Card className={`relative overflow-hidden group transition-colors ${styles.border}`}>
 
         <CardContent className="p-4 relative">
           <div className="flex items-start gap-3">

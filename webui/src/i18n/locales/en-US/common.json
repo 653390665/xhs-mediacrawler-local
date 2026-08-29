@@ -11,6 +11,12 @@
     "title": "MediaCrawler",
     "api": "API",
     "local": "LOCAL",
+    "apiStatus": {
+      "checking": "CHECKING",
+      "online": "ONLINE",
+      "unavailable": "UNAVAILABLE",
+      "unknown": "UNKNOWN"
+    },
     "disclaimer": "For personal learning only, commercial use prohibited",
     "license": "License"
   },

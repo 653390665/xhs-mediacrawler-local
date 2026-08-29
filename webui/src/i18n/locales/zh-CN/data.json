@@ -7,9 +7,14 @@
     "title": "数据文件管理",
     "records": "{{count}} 条",
     "rescan": "重新扫描",
+    "retry": "重试扫描",
     "loading": "[加载中] 正在扫描数据目录...",
     "noData": "暂无数据",
     "noDataHint": "启动爬虫开始数据采集，完成后结果将显示在此处。",
+    "errorTitle": "数据目录扫描失败",
+    "errorHint": "暂时无法确认数据文件，请检查服务状态后重试。",
+    "staleTitle": "数据可能已过期",
+    "staleHint": "本次扫描失败，以下显示最近一次成功结果。",
     "allCategories": "全部"
   },
   "file": {

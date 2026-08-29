@@ -7,9 +7,14 @@
     "title": "CAPTURED_PAYLOAD_MATRIX",
     "records": "{{count}} RECORDS",
     "rescan": "RESCAN",
+    "retry": "RETRY SCAN",
     "loading": "[LOADING] Scanning payload directory...",
     "noData": "NO_DATA_CAPTURED",
     "noDataHint": "Initialize crawler to begin data extraction sequence. Results will appear here upon completion.",
+    "errorTitle": "DATA SCAN FAILED",
+    "errorHint": "Data files could not be confirmed. Check service status and retry.",
+    "staleTitle": "DATA MAY BE STALE",
+    "staleHint": "This scan failed. Showing the most recent successful result.",
     "allCategories": "ALL"
   },
   "file": {
